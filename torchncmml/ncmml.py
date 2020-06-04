@@ -20,8 +20,7 @@ class NCMML(torch.nn.Module):
     def forward(self, features: torch.Tensor, targets: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         features, mean_features = self.transform(
             features), self.transform(self.mean_features.to(device=features.device))
-        negative_dists = -(features.unsqueeze(1) -
-                           mean_features.unsqueeze(0)).norm(dim=-1)
+        negative_dists = -torch.cdist(features, mean_features, p=2)
 
         outputs = (features, mean_features, negative_dists,)
 
