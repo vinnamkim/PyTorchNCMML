@@ -26,7 +26,7 @@ class NCMML(torch.nn.Module):
 
         if targets is not None:
             loss = self.loss(negative_dists, targets)
-            outputs = (loss,) + outputs
+            outputs = outputs + (loss,)
 
         return outputs
 
