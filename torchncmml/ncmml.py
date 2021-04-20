@@ -14,12 +14,12 @@ class NCMML(torch.nn.Module):
         else:
             raise Exception(f'Unknown transform : {transform}')
 
-        self.mean_features = torch.tensor(mean_features)
+        self.mean_features = nn.Parameter(mean_features, requires_grad=False)
         self.loss = nn.CrossEntropyLoss()
 
     def forward(self, features: torch.Tensor, targets: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        features, mean_features = self.transform(
-            features), self.transform(self.mean_features.to(device=features.device))
+        features, mean_features = \
+            self.transform(features), self.transform(self.mean_features)
         negative_dists = -torch.cdist(features, mean_features, p=2)
 
         outputs = (features, mean_features, negative_dists,)
@@ -48,10 +48,7 @@ class LinearTransform(nn.Module):
             in_features=in_features, out_features=out_features, bias=bias)
 
         with torch.no_grad():
-            if init_method == 'random':
-                self.transform.weight.data = 0.1 * \
-                    torch.randn_like(self.transform.weight.data)
-            elif init_method == 'identity':
+            if init_method == 'identity':
                 self.transform.weight.data = torch.zeros_like(
                     self.transform.weight.data)
                 self.transform.weight.data.fill_diagonal_(1.0)
